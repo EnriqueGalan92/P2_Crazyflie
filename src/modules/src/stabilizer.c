@@ -42,6 +42,7 @@
 #include "power_distribution.h"
 #include "crtp.h"
 #include "motors.h"
+#include "lqr.h"
 
 
 #ifdef ESTIMATOR_TYPE_kalman
@@ -51,12 +52,17 @@
 #endif
 
 static bool isInit;
+static float z_ref;
 
 // State variables for the stabilizer
 static setpoint_t setpoint;
 static sensorData_t sensorData;
 static state_t state;
 static control_t control;
+
+static struct u_values u_base;
+static struct u_values u_equilibrium;
+static struct v_system v_sys;
 
 static void stabilizerTask(void* param);
 
@@ -102,6 +108,7 @@ static void stabilizerTask(void* param)
   uint32_t lastWakeTime;
   static uint32_t tick_t = 0;
   static uint32_t dta_Tick = 0;
+  static float z_past = 0.0;
 
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 
@@ -128,6 +135,9 @@ static void stabilizerTask(void* param)
     commanderGetSetpoint(&setpoint, &state);
 
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
+
+    v_sys.vz = update_z(&z_past, sensorData.mag.z);
+    set_u (&u_base, &u_equilibrium, v_sys, z_ref);
 
     tick_t = xTaskGetTickCount();
     dta_Tick = tick_t - get_last_Tick();

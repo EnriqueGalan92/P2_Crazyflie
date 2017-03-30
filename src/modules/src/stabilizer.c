@@ -64,6 +64,7 @@ u_values_m u_base;
 u_values_m u_equilibrium;
 v_system_m v_sys;
 v_system_m v_sys_pre;
+w_control_m w_control;
 
 static void stabilizerTask(void* param);
 
@@ -142,8 +143,11 @@ static void stabilizerTask(void* param)
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
     u_equilibrium = set_u (&u_base, &sensorData, &state, z_ref, &v_sys_pre);
-    v_sys=set_dyn_model (&v_sys_pre , &sensorData, &state, &u_equilibrium);
+    v_sys = set_dyn_model (&v_sys_pre , &sensorData, &state, &u_equilibrium);
     v_sys_pre = v_sys;
+
+    w_control = calculate_w(&u_equilibrium);
+
     tick_t = xTaskGetTickCount();
     dta_Tick = tick_t - get_last_Tick();
     if ( dta_Tick < 1000)
@@ -170,6 +174,13 @@ static void stabilizerTask(void* param)
     tick++;
   }
 }
+
+LOG_GROUP_START(wcontrol)
+LOG_ADD(LOG_FLOAT, w1, &w_control.w1)
+LOG_ADD(LOG_FLOAT, w2, &w_control.w2)
+LOG_ADD(LOG_FLOAT, w3, &w_control.w3)
+LOG_ADD(LOG_FLOAT, w4, &w_control.w4)
+LOG_GROUP_STOP(wcontrol)
 
 LOG_GROUP_START(vsys)
 LOG_ADD(LOG_FLOAT, z, &v_sys.z)

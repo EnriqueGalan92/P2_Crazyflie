@@ -54,6 +54,41 @@ v_system_m set_dyn_model (v_system_m *v_system_pre, const sensorData_t *sensorDa
     return v_system;
 }
 
+w_control_m calculate_w (u_values_m *u_values)
+{
+    w_control_m w;
+    float w1_sum;
+    float w2_sum;
+    float w3_sum;
+    float w4_sum;
+    w1_sum = ( cT*u_values->u_1) +
+             (-((sqrtf(2)/2)*d*cT)*u_values->u_2) +
+             (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
+             (-cQ*u_values->u_4);
+
+    w2_sum = ( cT*u_values->u_1) +
+             (-((sqrtf(2)/2)*d*cT)*u_values->u_2) +
+             ( ((sqrtf(2)/2)*d*cT)*u_values->u_3) +
+             ( cQ*u_values->u_4);
+
+    w3_sum = ( cT*u_values->u_1) +
+             ( ((sqrtf(2)/2)*d*cT)*u_values->u_2) +
+             ( ((sqrtf(2)/2)*d*cT)*u_values->u_3) +
+             (-cQ*u_values->u_4);
+
+    w4_sum = ( cT*u_values->u_1) +
+             ( ((sqrtf(2)/2)*d*cT)*u_values->u_2) +
+             (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
+             ( cQ*u_values->u_4);
+
+    w.w1 = sqrtf(w1_sum);
+    w.w2 = sqrtf(w2_sum);
+    w.w3 = sqrtf(w3_sum);
+    w.w4 = sqrtf(w4_sum);
+
+    return w;
+}
+
 u_values_m initialize_lqr_u_variables()
 {
     u_values_m init;
@@ -77,8 +112,3 @@ v_system_m initialize_lqr_v_variables()
     v_system.wz = 0.0f;
     return v_system;
 }
-
-
-
-
-

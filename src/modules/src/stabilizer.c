@@ -141,7 +141,7 @@ static void stabilizerTask(void* param)
     commanderGetSetpoint(&setpoint, &state);
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
-    u_equilibrium = set_u (&u_base, &v_sys, z_ref);
+    u_equilibrium = set_u (&u_base, &sensorData, &state, z_ref, &v_sys_pre);
     v_sys=set_dyn_model (&v_sys_pre , &sensorData, &state, &u_equilibrium);
     v_sys_pre = v_sys;
     tick_t = xTaskGetTickCount();
@@ -170,6 +170,17 @@ static void stabilizerTask(void* param)
     tick++;
   }
 }
+
+LOG_GROUP_START(vsys)
+LOG_ADD(LOG_FLOAT, z, &v_sys.z)
+LOG_ADD(LOG_FLOAT, vz, &v_sys.vz)
+LOG_ADD(LOG_FLOAT, yaw, &v_sys.yaw)
+LOG_ADD(LOG_FLOAT, roll, &v_sys.roll)
+LOG_ADD(LOG_FLOAT, pitch, &v_sys.pitch)
+LOG_ADD(LOG_FLOAT, wx, &v_sys.wx)
+LOG_ADD(LOG_FLOAT, wy, &v_sys.wy)
+LOG_ADD(LOG_FLOAT, wz, &v_sys.wz)
+LOG_GROUP_STOP(vsys)
 
 LOG_GROUP_START(umatrix)
 LOG_ADD(LOG_FLOAT, u1, &u_equilibrium.u_1)

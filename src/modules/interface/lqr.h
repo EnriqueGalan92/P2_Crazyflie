@@ -40,7 +40,8 @@ typedef struct v_system
     float wz;
 }v_system_m;
 
-u_values_m set_u (const u_values_m *init, v_system_m *sys, float z_ref);
+u_values_m set_u (const u_values_m *init, const sensorData_t *sensorData,
+                  const state_t *state, float z_ref, v_system_m *vz_prev);
 v_system_m set_dyn_model (v_system_m *v_system, const sensorData_t *sensorData, const state_t *state, const u_values_m *u_values);
 u_values_m initialize_lqr_u_variables();
 v_system_m initialize_lqr_v_variables();

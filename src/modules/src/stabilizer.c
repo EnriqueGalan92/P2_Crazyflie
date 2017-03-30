@@ -65,6 +65,7 @@ u_values_m u_equilibrium;
 v_system_m v_sys;
 v_system_m v_sys_pre;
 w_control_m w_control;
+w_motor_m w_motor;
 
 static void stabilizerTask(void* param);
 
@@ -110,7 +111,7 @@ static void stabilizerTask(void* param)
   uint32_t lastWakeTime;
   static uint32_t tick_t = 0;
   static uint32_t dta_Tick = 0;
-  z_ref = 843.0;
+  z_ref = 2000.0;
 
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 
@@ -147,6 +148,7 @@ static void stabilizerTask(void* param)
     v_sys_pre = v_sys;
 
     w_control = calculate_w(&u_equilibrium);
+    w_motor = calculate_motor (&w_control);
 
     tick_t = xTaskGetTickCount();
     dta_Tick = tick_t - get_last_Tick();
@@ -156,10 +158,10 @@ static void stabilizerTask(void* param)
         motorsSetRatio(MOTOR_M2, w2_motor);
         motorsSetRatio(MOTOR_M3, w3_motor);
         motorsSetRatio(MOTOR_M4, w4_motor);*/
-        motorsSetRatio(MOTOR_M1, 3000);
-        motorsSetRatio(MOTOR_M2, 0);
-        motorsSetRatio(MOTOR_M3, 0);
-        motorsSetRatio(MOTOR_M4, 0);
+        motorsSetRatio(MOTOR_M1, w_motor.w1);
+        motorsSetRatio(MOTOR_M2, w_motor.w2);
+        motorsSetRatio(MOTOR_M3, w_motor.w3);
+        motorsSetRatio(MOTOR_M4, w_motor.w4);
     }
     else
     {
@@ -174,6 +176,13 @@ static void stabilizerTask(void* param)
     tick++;
   }
 }
+
+LOG_GROUP_START(wmotor)
+LOG_ADD(LOG_UINT16, w1, &w_motor.w1)
+LOG_ADD(LOG_UINT16, w2, &w_motor.w2)
+LOG_ADD(LOG_UINT16, w3, &w_motor.w3)
+LOG_ADD(LOG_UINT16, w4, &w_motor.w4)
+LOG_GROUP_STOP(wmotor)
 
 LOG_GROUP_START(wcontrol)
 LOG_ADD(LOG_FLOAT, w1, &w_control.w1)

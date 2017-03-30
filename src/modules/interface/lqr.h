@@ -22,6 +22,8 @@
 #define cQ 0.005964552f
 #define cT 0.315f
 #define d 0.046f
+#define ZERO 0.0f
+#define MAX_MOTOR 65535
 
 typedef struct u_values
 {
@@ -51,12 +53,21 @@ typedef struct w_control
     float w4;
 }w_control_m;
 
+typedef struct w_motor
+{
+    uint16_t w1;
+    uint16_t w2;
+    uint16_t w3;
+    uint16_t w4;
+}w_motor_m;
+
 u_values_m set_u (const u_values_m *init, const sensorData_t *sensorData,
                   const state_t *state, float z_ref, v_system_m *vz_prev);
 v_system_m set_dyn_model (v_system_m *v_system, const sensorData_t *sensorData, const state_t *state, const u_values_m *u_values);
 u_values_m initialize_lqr_u_variables();
 v_system_m initialize_lqr_v_variables();
 w_control_m calculate_w (u_values_m *u_values);
+w_motor_m calculate_motor (w_control_m *wc);
 float update_z (float *past_z, float current_z);
 
 #endif /* SRC_MODULES_INTERFACE_LQR_H_ */

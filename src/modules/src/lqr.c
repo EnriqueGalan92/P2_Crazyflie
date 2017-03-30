@@ -18,7 +18,7 @@ u_values_m set_u (const u_values_m *init, const sensorData_t *sensorData,
                   const state_t *state, float z_ref, v_system_m *vz_prev)
 {
     u_values_m equi;
-    equi.u_1 = - sensorData->baro.pressure -((float)3.3434*vz_prev->z)+z_ref+init->u_1;
+    equi.u_1 = - sensorData->baro.asl -((float)3.3434*vz_prev->z)+z_ref+init->u_1;
     equi.u_2 = -(float)5.7296* state->attitude.roll - (float)28.6479*sensorData->gyro.x;
     equi.u_3 = -(float)5.7296*-state->attitude.pitch - (float)28.6479*sensorData->gyro.y;
     equi.u_4 = -(float)5.7296* state->attitude.yaw - (float)28.6479*sensorData->gyro.z;
@@ -38,7 +38,7 @@ v_system_m set_dyn_model (v_system_m *v_system_pre, const sensorData_t *sensorDa
 {
     v_system_m v_system;
     float past_vz = v_system_pre->z;
-    v_system.z=update_z(&past_vz, sensorData->baro.pressure);
+    v_system.z=update_z(&past_vz, sensorData->baro.asl);
     v_system.vz=-GRAV+((1/MASS)*(float)cos(-state->attitude.pitch)*(float)cos(state->attitude.roll)*u_values->u_1);
     v_system.yaw=(((float)sin(state->attitude.roll)/(float)cos(-state->attitude.pitch))*sensorData->gyro.y)+
                   (((float)cos(state->attitude.roll)/(float)cos(-state->attitude.pitch))*sensorData->gyro.z);
@@ -81,12 +81,73 @@ w_control_m calculate_w (u_values_m *u_values)
              (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
              ( cQ*u_values->u_4);
 
-    w.w1 = sqrtf(w1_sum);
-    w.w2 = sqrtf(w2_sum);
-    w.w3 = sqrtf(w3_sum);
-    w.w4 = sqrtf(w4_sum);
+    w.w1 = 14000*sqrtf(w1_sum);
+    w.w2 = 14000*sqrtf(w2_sum);
+    w.w3 = 14000*sqrtf(w3_sum);
+    w.w4 = 14000*sqrtf(w4_sum);
+
+    if (ZERO > w.w1)
+    {
+        w.w1 = 0.0f;
+    }
+
+    if (ZERO > w.w2)
+    {
+        w.w2 = 0.0f;
+    }
+
+    if (ZERO > w.w3)
+    {
+        w.w3 = 0.0f;
+    }
+
+    if (ZERO > w.w4)
+    {
+        w.w4 = 0.0f;
+    }
 
     return w;
+}
+
+w_motor_m calculate_motor (w_control_m *wc)
+{
+    w_motor_m wm;
+    if (MAX_MOTOR > (uint16_t)wc->w1)
+    {
+        wm.w1 = (uint16_t)wc->w1;
+    }
+    else
+    {
+        wm.w1 = MAX_MOTOR;
+    }
+
+    if (MAX_MOTOR > (uint16_t)wc->w2)
+    {
+        wm.w2 = (uint16_t)wc->w2;
+    }
+    else
+    {
+        wm.w2 = MAX_MOTOR;
+    }
+
+    if (MAX_MOTOR > (uint16_t)wc->w3)
+    {
+        wm.w3 = (uint16_t)wc->w3;
+    }
+    else
+    {
+        wm.w3 = MAX_MOTOR;
+    }
+
+    if (MAX_MOTOR > (uint16_t)wc->w4)
+    {
+        wm.w4 = (uint16_t)wc->w4;
+    }
+    else
+    {
+        wm.w4 = MAX_MOTOR;
+    }
+    return wm;
 }
 
 u_values_m initialize_lqr_u_variables()

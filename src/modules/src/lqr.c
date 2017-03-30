@@ -19,9 +19,9 @@ u_values_m set_u (const u_values_m *init, const sensorData_t *sensorData,
 {
     u_values_m equi;
     equi.u_1 = - sensorData->baro.pressure -((float)3.3434*vz_prev->z)+z_ref+init->u_1;
-    equi.u_2 = -(float)5.7296*state->attitude.roll - (float)28.6479*sensorData->gyro.x;
-    equi.u_3 = -(float)5.7296*state->attitude.pitch - (float)28.6479*sensorData->gyro.y;
-    equi.u_4 = -(float)5.7296*state->attitude.yaw - (float)28.6479*sensorData->gyro.z;
+    equi.u_2 = -(float)5.7296* state->attitude.roll - (float)28.6479*sensorData->gyro.x;
+    equi.u_3 = -(float)5.7296*-state->attitude.pitch - (float)28.6479*sensorData->gyro.y;
+    equi.u_4 = -(float)5.7296* state->attitude.yaw - (float)28.6479*sensorData->gyro.z;
 
     return equi;
 }
@@ -39,14 +39,14 @@ v_system_m set_dyn_model (v_system_m *v_system_pre, const sensorData_t *sensorDa
     v_system_m v_system;
     float past_vz = v_system_pre->z;
     v_system.z=update_z(&past_vz, sensorData->baro.pressure);
-    v_system.vz=-GRAV+((1/MASS)*(float)cos(state->attitude.pitch)*(float)cos(state->attitude.roll)*u_values->u_1);
-    v_system.yaw=(((float)sin(state->attitude.roll)/(float)cos(state->attitude.pitch))*sensorData->gyro.y)+
-                  (((float)cos(state->attitude.roll)/(float)cos(state->attitude.pitch))*sensorData->gyro.z);
+    v_system.vz=-GRAV+((1/MASS)*(float)cos(-state->attitude.pitch)*(float)cos(state->attitude.roll)*u_values->u_1);
+    v_system.yaw=(((float)sin(state->attitude.roll)/(float)cos(-state->attitude.pitch))*sensorData->gyro.y)+
+                  (((float)cos(state->attitude.roll)/(float)cos(-state->attitude.pitch))*sensorData->gyro.z);
     v_system.pitch=((float)cos(state->attitude.roll)*sensorData->gyro.y) -
                     ((float)sin(state->attitude.roll)*sensorData->gyro.z);
     v_system.roll =(sensorData->gyro.x)+
-                    ((float)tan(state->attitude.pitch)*(float)sin(state->attitude.roll)*sensorData->gyro.y)+
-                    ((float)tan(state->attitude.pitch)*(float)cos(state->attitude.roll)*sensorData->gyro.z);
+                    ((float)tan(-state->attitude.pitch)*(float)sin(state->attitude.roll)*sensorData->gyro.y)+
+                    ((float)tan(-state->attitude.pitch)*(float)cos(state->attitude.roll)*sensorData->gyro.z);
     v_system.wx = (((I_y-I_z)/I_x)*sensorData->gyro.y*sensorData->gyro.z)+(u_values->u_2/I_x);
     v_system.wy = (((I_z-I_x)/I_y)*sensorData->gyro.x*sensorData->gyro.z)+(u_values->u_3/I_y);
     v_system.wz = (((I_x-I_y)/I_z)*sensorData->gyro.x*sensorData->gyro.y)+(u_values->u_4/I_z);

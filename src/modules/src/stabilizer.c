@@ -60,9 +60,9 @@ static sensorData_t sensorData;
 static state_t state;
 static control_t control;
 
-static struct u_values u_base;
-static struct u_values u_equilibrium;
-static struct v_system v_sys;
+static u_values_m u_base;
+static u_values_m u_equilibrium;
+static v_system_m v_sys;
 
 static void stabilizerTask(void* param);
 
@@ -108,7 +108,7 @@ static void stabilizerTask(void* param)
   uint32_t lastWakeTime;
   static uint32_t tick_t = 0;
   static uint32_t dta_Tick = 0;
-  static float z_past = 0.0;
+  z_ref = 843.0;
 
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 
@@ -120,6 +120,8 @@ static void stabilizerTask(void* param)
   while(!sensorsAreCalibrated()) {
     vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
   }
+
+  initialize_lqr_variables(&u_base, &v_sys);
 
   while(1) {
     vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
@@ -133,11 +135,10 @@ static void stabilizerTask(void* param)
 #endif
 
     commanderGetSetpoint(&setpoint, &state);
-
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
-    v_sys.vz = update_z(&z_past, sensorData.mag.z);
-    set_u (&u_base, &u_equilibrium, v_sys, z_ref);
+    set_u (&u_base, &u_equilibrium, &v_sys, z_ref);
+    set_dyn_model (&v_sys , &sensorData, &state, &u_equilibrium);
 
     tick_t = xTaskGetTickCount();
     dta_Tick = tick_t - get_last_Tick();
@@ -165,6 +166,13 @@ static void stabilizerTask(void* param)
     tick++;
   }
 }
+
+LOG_GROUP_START(u_matrix)
+LOG_ADD(LOG_FLOAT, u1, &u_equilibrium.u_1)
+LOG_ADD(LOG_FLOAT, u2, &u_equilibrium.u_2)
+LOG_ADD(LOG_FLOAT, u3, &u_equilibrium.u_3)
+LOG_ADD(LOG_FLOAT, u4, &u_equilibrium.u_4)
+LOG_GROUP_STOP(u_matrix)
 
 LOG_GROUP_START(ctrltarget)
 LOG_ADD(LOG_FLOAT, roll, &setpoint.attitude.roll)

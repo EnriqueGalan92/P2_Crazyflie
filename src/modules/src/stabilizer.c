@@ -60,9 +60,10 @@ static sensorData_t sensorData;
 static state_t state;
 static control_t control;
 
-static u_values_m u_base;
-static u_values_m u_equilibrium;
-static v_system_m v_sys;
+u_values_m u_base;
+u_values_m u_equilibrium;
+v_system_m v_sys;
+v_system_m v_sys_pre;
 
 static void stabilizerTask(void* param);
 
@@ -121,7 +122,10 @@ static void stabilizerTask(void* param)
     vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
   }
 
-  initialize_lqr_variables(&u_base, &v_sys);
+  u_base = initialize_lqr_u_variables();
+  u_equilibrium = initialize_lqr_u_variables();
+  v_sys = initialize_lqr_v_variables();
+  v_sys_pre = initialize_lqr_v_variables();
 
   while(1) {
     vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
@@ -137,9 +141,9 @@ static void stabilizerTask(void* param)
     commanderGetSetpoint(&setpoint, &state);
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
-    set_u (&u_base, &u_equilibrium, &v_sys, z_ref);
-    set_dyn_model (&v_sys , &sensorData, &state, &u_equilibrium);
-
+    u_equilibrium = set_u (&u_base, &v_sys, z_ref);
+    v_sys=set_dyn_model (&v_sys_pre , &sensorData, &state, &u_equilibrium);
+    v_sys_pre = v_sys;
     tick_t = xTaskGetTickCount();
     dta_Tick = tick_t - get_last_Tick();
     if ( dta_Tick < 1000)
@@ -167,12 +171,12 @@ static void stabilizerTask(void* param)
   }
 }
 
-LOG_GROUP_START(u_matrix)
+LOG_GROUP_START(umatrix)
 LOG_ADD(LOG_FLOAT, u1, &u_equilibrium.u_1)
 LOG_ADD(LOG_FLOAT, u2, &u_equilibrium.u_2)
 LOG_ADD(LOG_FLOAT, u3, &u_equilibrium.u_3)
 LOG_ADD(LOG_FLOAT, u4, &u_equilibrium.u_4)
-LOG_GROUP_STOP(u_matrix)
+LOG_GROUP_STOP(umatrix)
 
 LOG_GROUP_START(ctrltarget)
 LOG_ADD(LOG_FLOAT, roll, &setpoint.attitude.roll)

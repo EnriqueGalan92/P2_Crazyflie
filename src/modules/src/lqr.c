@@ -81,30 +81,30 @@ w_control_m calculate_w (u_values_m *u_values)
              (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
              ( cQ*u_values->u_4);
 
-    w.w1 = 14000*sqrtf(w1_sum);
-    w.w2 = 14000*sqrtf(w2_sum);
-    w.w3 = 14000*sqrtf(w3_sum);
-    w.w4 = 14000*sqrtf(w4_sum);
-
-    if (ZERO > w.w1)
+    if (ZERO > w1_sum)
     {
-        w.w1 = 0.0f;
+        w1_sum = 0.0f;
     }
 
-    if (ZERO > w.w2)
+    if (ZERO > w2_sum)
     {
-        w.w2 = 0.0f;
+        w2_sum = 0.0f;
     }
 
-    if (ZERO > w.w3)
+    if (ZERO > w3_sum)
     {
-        w.w3 = 0.0f;
+        w3_sum = 0.0f;
     }
 
-    if (ZERO > w.w4)
+    if (ZERO > w4_sum)
     {
-        w.w4 = 0.0f;
+        w4_sum = 0.0f;
     }
+
+    w.w1 = 65530*sqrtf(w1_sum);
+    w.w2 = 65530*sqrtf(w2_sum);
+    w.w3 = 65530*sqrtf(w3_sum);
+    w.w4 = 65530*sqrtf(w4_sum);
 
     return w;
 }
@@ -112,7 +112,7 @@ w_control_m calculate_w (u_values_m *u_values)
 w_motor_m calculate_motor (w_control_m *wc)
 {
     w_motor_m wm;
-    if (MAX_MOTOR > (uint16_t)wc->w1)
+    if (65535.0f > wc->w1)
     {
         wm.w1 = (uint16_t)wc->w1;
     }
@@ -121,7 +121,7 @@ w_motor_m calculate_motor (w_control_m *wc)
         wm.w1 = MAX_MOTOR;
     }
 
-    if (MAX_MOTOR > (uint16_t)wc->w2)
+    if (65535.0f > wc->w2)
     {
         wm.w2 = (uint16_t)wc->w2;
     }
@@ -130,7 +130,7 @@ w_motor_m calculate_motor (w_control_m *wc)
         wm.w2 = MAX_MOTOR;
     }
 
-    if (MAX_MOTOR > (uint16_t)wc->w3)
+    if (65535.0f > wc->w3)
     {
         wm.w3 = (uint16_t)wc->w3;
     }
@@ -139,7 +139,7 @@ w_motor_m calculate_motor (w_control_m *wc)
         wm.w3 = MAX_MOTOR;
     }
 
-    if (MAX_MOTOR > (uint16_t)wc->w4)
+    if (65535.0f > wc->w4)
     {
         wm.w4 = (uint16_t)wc->w4;
     }

@@ -111,7 +111,8 @@ static void stabilizerTask(void* param)
   uint32_t lastWakeTime;
   static uint32_t tick_t = 0;
   static uint32_t dta_Tick = 0;
-  z_ref = 2000.0;
+  z_ref = 1656.0;
+
 
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 

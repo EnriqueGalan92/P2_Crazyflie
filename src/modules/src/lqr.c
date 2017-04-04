@@ -61,25 +61,25 @@ w_control_m calculate_w (u_values_m *u_values)
     float w2_sum;
     float w3_sum;
     float w4_sum;
-    w1_sum = ( cT*u_values->u_1) +
-             (-((sqrtf(2)/2)*d*cT)*u_values->u_2) +
-             (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
-             (-cQ*u_values->u_4);
+    w1_sum = ( 0.7937f*u_values->u_1) +
+             (-24.3998f*u_values->u_2) +
+             (-24.3998f*u_values->u_3) +
+             (-41.9143f*u_values->u_4);
 
-    w2_sum = ( cT*u_values->u_1) +
-             (-((sqrtf(2)/2)*d*cT)*u_values->u_2) +
-             ( ((sqrtf(2)/2)*d*cT)*u_values->u_3) +
-             ( cQ*u_values->u_4);
+    w2_sum = ( 0.7937f*u_values->u_1) +
+             (-24.3998f*u_values->u_2) +
+             ( 24.3998f*u_values->u_3) +
+             ( 41.9143f*u_values->u_4);
 
-    w3_sum = ( cT*u_values->u_1) +
-             ( ((sqrtf(2)/2)*d*cT)*u_values->u_2) +
-             ( ((sqrtf(2)/2)*d*cT)*u_values->u_3) +
-             (-cQ*u_values->u_4);
+    w3_sum = ( 0.7937f*u_values->u_1) +
+             ( 24.3998f*u_values->u_2) +
+             ( 24.3998f*u_values->u_3) +
+             (-41.9143f*u_values->u_4);
 
-    w4_sum = ( cT*u_values->u_1) +
-             ( ((sqrtf(2)/2)*d*cT)*u_values->u_2) +
-             (-((sqrtf(2)/2)*d*cT)*u_values->u_3) +
-             ( cQ*u_values->u_4);
+    w4_sum = ( 0.7937f*u_values->u_1) +
+             ( 24.3998f*u_values->u_2) +
+             (-24.3998f*u_values->u_3) +
+             ( 41.9143f*u_values->u_4);
 
     if (ZERO > w1_sum)
     {
@@ -101,10 +101,10 @@ w_control_m calculate_w (u_values_m *u_values)
         w4_sum = 0.0f;
     }
 
-    w.w1 = 65530*sqrtf(w1_sum);
-    w.w2 = 65530*sqrtf(w2_sum);
-    w.w3 = 65530*sqrtf(w3_sum);
-    w.w4 = 65530*sqrtf(w4_sum);
+    w.w1 = 65000*sqrtf(w1_sum);
+    w.w2 = 65000*sqrtf(w2_sum);
+    w.w3 = 65000*sqrtf(w3_sum);
+    w.w4 = 65000*sqrtf(w4_sum);
 
     return w;
 }
